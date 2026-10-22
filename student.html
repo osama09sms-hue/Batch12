@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><title>B12 تمريض</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><style>:root{--bg:#0a1628;--c:#12233d;--c2:#183050;--t:#eaf2fb;--m:#8fa6c2;--p:#19c3b1;--a:#3b82f6;--b:#24405f;box-sizing:border-box}
+@media(prefers-color-scheme:light){:root{--bg:#eef3f9;--c:#fff;--c2:#e6eef8;--t:#0d2038;--m:#5b6f88;--b:#d3deec}}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,Tahoma,sans-serif}
+.w{max-width:620px;margin:auto;padding:14px 14px 90px}
+.hero{background:linear-gradient(135deg,#0e7c8f,#1d4ed8);border-radius:18px;padding:18px;color:#fff;overflow:hidden}.hero h1{margin:0;font-size:22px}.hero p{margin:4px 0 0;opacity:.85;font-size:13px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px;margin:10px 0;animation:up .4s both}@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.it{display:flex;gap:12px;align-items:center;cursor:pointer}.n{background:linear-gradient(135deg,var(--p),var(--a));color:#fff;border-radius:12px;min-width:38px;height:38px;display:grid;place-items:center;font-weight:800}.m{color:var(--m);font-size:13px}
+input,textarea,select{width:100%;padding:12px;margin:5px 0;border:1px solid var(--b);border-radius:10px;background:var(--c2);color:var(--t);font:inherit}
+button{background:linear-gradient(135deg,var(--p),var(--a));color:#fff;border:0;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;margin:4px 0}button.g{background:none;color:var(--p);border:1px solid var(--p)}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--c);border-top:1px solid var(--b);display:flex;z-index:5}.nav button{flex:1;background:none;color:var(--m);border-radius:0;margin:0;padding:12px 4px;font-size:12px}.nav button.on{color:var(--p)}
+pre{white-space:pre-wrap;font:inherit;margin:6px 0 0;line-height:1.7}.av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--c2);display:grid;place-items:center}
+.ecg{width:100%;height:60px}.ecg path{stroke:#fff;stroke-width:3;fill:none;stroke-dasharray:600;stroke-dashoffset:600;animation:d 2.6s linear infinite}@keyframes d{to{stroke-dashoffset:-600}}
+.lg{min-height:100vh;display:grid;place-items:center;padding:20px}.lb{width:100%;max-width:380px;text-align:center}
+.logo{width:84px;height:84px;margin:auto;border-radius:24px;background:linear-gradient(135deg,var(--p),var(--a));display:grid;place-items:center;font-size:42px;color:#fff;animation:pulse 1.8s infinite}@keyframes pulse{0%,100%{box-shadow:0 0 0 0 #19c3b180}50%{box-shadow:0 0 0 18px #19c3b100}}
+.err{color:#ff6b6b;font-size:13px;min-height:18px}.tag{display:inline-block;background:var(--c2);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--p)}
+.bub{max-width:82%;padding:9px 12px;border-radius:14px;margin:6px 0;background:var(--c2)}.bub.me{background:linear-gradient(135deg,var(--p),var(--a));color:#fff;margin-inline-start:auto}
+</style></head><body><div id="app"></div><script>
+const sb=supabase.createClient('https://vkhqvoytcwrxvazcnqhx.supabase.co','sb_publishable_ZomHUptqN7Hqyldh3qHLBg_yCbsp6is');const $=i=>document.getElementById(i),A=$('app'),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));const ECG='<svg class="ecg" viewBox="0 0 600 60"><path d="M0 30h150l15-22 20 44 20-40 15 18h380"/></svg>';
+let me=null,v={p:'home'},S=[],L=[],CH=[],err='',busy=false;
+try{me=JSON.parse(localStorage.getItem('b12me'))}catch(e){}
+async function load(){const a=await sb.from('subjects').select('*').order('num'),b=await sb.from('lectures').select('*').order('num');S=a.data||[];L=b.data||[];draw()}
+async function loadCh(){const r=await sb.from('messages').select('*').order('created_at',{ascending:false}).limit(60);CH=(r.data||[]).reverse();if(v.p==='chat')draw()}
+function login(){A.innerHTML='<div class="lg"><div class="lb"><div class="logo">✚</div><h1 style="margin:18px 0 2px">B12 تمريض</h1><p class="m">سجّل دخولك لتبدأ</p><div class="card"><input id="nm" placeholder="الاسم كاملاً"><input id="id" inputmode="numeric" placeholder="الرقم الجامعي"><div class="err">'+err+'</div><button style="width:100%" onclick="reg()">'+(busy?'...':'دخول')+'</button></div></div></div>'}
+async function reg(){const u=$('id').value.trim(),n=$('nm').value.trim();if(!u||!n){err='اكتب الاسم والرقم الجامعي';return login()}busy=true;login();
+const r=await sb.rpc('check_student',{p:u});busy=false;
+if(r.error){err='خطأ في الاتصال';return login()}
+if(!r.data||!r.data.length){err='الرقم الجامعي غير مسجّل لدى الإدارة';return login()}
+me={n:r.data[0].name||n,u,ph:r.data[0].photo_url};try{localStorage.setItem('b12me',JSON.stringify(me))}catch(e){}err='';load();loadCh()}
+function go(x){v=x;draw();scrollTo(0,0)}
+function out(){me=null;try{localStorage.removeItem('b12me')}catch(e){}login()}
+function draw(){if(!me)return login();let h='<div class="w"><div class="hero">'+ECG+'<h1>أهلاً '+esc(me.n.split(' ')[0])+'</h1><p>الرقم الجامعي: '+esc(me.u)+'</p></div>';
+if(v.p==='home'){h+='<h3>المواد</h3>';S.forEach(s=>h+='<div class="card it" onclick="go({p:\'s\',s:'+s.id+'})"><span class="n">'+s.num+'</span><div><b>'+esc(s.name)+'</b><div class="m">'+esc(s.doctor)+'</div></div></div>');if(!S.length)h+='<p class="m">لا توجد مواد بعد</p>'}
+if(v.p==='s'){const s=S.find(x=>x.id===v.s);h+='<button class="g" onclick="go({p:\'home\'})">رجوع</button><h3>'+esc(s.name)+'</h3><span class="tag">'+esc(s.doctor)+'</span>';L.filter(l=>l.subject_id===v.s).forEach(l=>h+='<div class="card it" onclick="go({p:\'l\',l:'+l.id+'})"><span class="n">'+l.num+'</span><b>'+esc(l.title)+'</b></div>')}
+if(v.p==='l'){const l=L.find(x=>x.id===v.l);h+='<button class="g" onclick="go({p:\'s\',s:'+l.subject_id+'})">رجوع</button><h3>'+esc(l.title)+'</h3>'+(l.sheet_url?'<div class="card"><b>📄 شيت المحاضرة</b><br><a href="'+esc(l.sheet_url)+'" target="_blank"><button>فتح الشيت</button></a></div>':'')+'<div class="card"><b>📝 الملخص</b><pre>'+esc(l.summary)+'</pre></div><div class="card"><b>❓ الأسئلة</b><pre>'+esc(l.questions)+'</pre></div>'}
+if(v.p==='dr'){h+='<h3>الدكاترة</h3>';S.forEach(s=>h+='<div class="card it"><span class="av">👨‍⚕️</span><div><b>'+esc(s.doctor)+'</b><div class="m">'+esc(s.name)+'</div></div></div>')}
+if(v.p==='chat'){h+='<h3>النقاش</h3>';CH.forEach(c=>h+='<div class="bub '+(c.sender===me.n?'me':'')+'"><div style="font-size:12px;opacity:.7">'+esc(c.sender)+'</div>'+esc(c.body)+'</div>');h+='<textarea id="tx" rows="2" placeholder="اكتب رسالة..."></textarea><button onclick="send()">إرسال</button>'}
+if(v.p==='me'){h+='<h3>حسابي</h3><div class="card"><b>'+esc(me.n)+'</b><div class="m">'+esc(me.u)+'</div></div><button class="g" onclick="out()">تسجيل خروج</button>'}
+h+='</div><div class="nav">'+[['home','المواد','📚'],['dr','الدكاترة','🩺'],['chat','النقاش','💬'],['me','حسابي','👤']].map(([k,t,e])=>'<button class="'+(v.p===k?'on':'')+'" onclick="go({p:\''+k+'\'})">'+e+'<br>'+t+'</button>').join('')+'</div>';A.innerHTML=h}
+async function send(){const t=$('tx').value.trim();if(!t)return;await sb.from('messages').insert({sender:me.n,body:t});loadCh()}
+if(me){load();loadCh()}draw();setInterval(()=>me&&loadCh(),5000)</script></body></html>
