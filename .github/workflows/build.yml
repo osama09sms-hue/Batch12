@@ -1,74 +1,14 @@
+
 name: Build APK
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: student
-            id: com.b12.student
-            label: "B12 تمريض"
-          - name: admin
-            id: com.b12.admin
-            label: "B12 الإدارة"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - name: Prepare web app
-        run: |
-          mkdir app && cd app
-          npm init -y
-          npm i @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
-          mkdir www
-          cp ../${{ matrix.name }}.html www/index.html
-          cp ../${{ matrix.name }}-manifest.json www/
-          cp ../${{ matrix.name }}-*.png www/
-          cp ../sw.js www/
-          printf '%s' '{"appId":"${{ matrix.id }}","appName":"${{ matrix.label }}","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
-      - name: Add Android
-        working-directory: app
-        run: |
-          npx cap add android
-          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application#' android/app/src/main/AndroidManifest.xml
-      - name: Icons
-        continue-on-error: true
-        working-directory: app
-        run: |
-          R=android/app/src/main/res
-          for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            n=${d%%:*}; s=${d##*:}
-            convert ../${{ matrix.name }}-512.png -resize ${s}x${s} $R/mipmap-$n/ic_launcher.png
-            cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
-          done
-          rm -rf $R/mipmap-anydpi-v26
-      - name: Sync and build
-        working-directory: app
-        run: |
-          npx cap sync android
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: B12-${{ matrix.name }}-APK
-          path: app/android/app/build/outputs/apk/debug/app-debug.apk
-name: Build APK
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+
 env:
   ONESIGNAL_DISABLE_LOCATION: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -81,47 +21,67 @@ jobs:
           - name: admin
             id: com.b12.admin
             label: B12Admin
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
+
       - name: Prepare web app
         run: |
-          mkdir app && cd app
+          mkdir app
+          cd app
           npm init -y
           npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @onesignal/capacitor-plugin esbuild
           mkdir www
+
           cp ../${{ matrix.name }}.html www/index.html
           cp ../${{ matrix.name }}-manifest.json www/
           cp ../${{ matrix.name }}-*.png www/
           cp ../sw.js www/
+
           cat > os-entry.js <<'JS'
           import OneSignal from '@onesignal/capacitor-plugin';
-          window.B12OS = { init: function (id) { OneSignal.initialize(id); return OneSignal.Notifications.requestPermission(false); } };
+
+          window.B12OS = {
+            init: function (id) {
+              OneSignal.initialize(id);
+              return OneSignal.Notifications.requestPermission(false);
+            }
+          };
           JS
+
           npx esbuild os-entry.js --bundle --format=iife --outfile=www/os.js
+          sed -i 's#</body>#<script src="os.js"></script></body>#i' www/index.html
+
           printf '%s' '{"appId":"${{ matrix.id }}","appName":"${{ matrix.label }}","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
+
       - name: Add Android
         working-directory: app
         run: |
           npx cap add android
           sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application#' android/app/src/main/AndroidManifest.xml
+
       - name: Icons
         continue-on-error: true
         working-directory: app
         run: |
           R=android/app/src/main/res
           for d in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
-            n=${d%%:*}; s=${d##*:}
+            n=${d%%:*}
+            s=${d##*:}
             convert ../${{ matrix.name }}-512.png -resize ${s}x${s} $R/mipmap-$n/ic_launcher.png
             cp $R/mipmap-$n/ic_launcher.png $R/mipmap-$n/ic_launcher_round.png
           done
           rm -rf $R/mipmap-anydpi-v26
+
       - name: Sync and build
         working-directory: app
         run: |
@@ -129,7 +89,9 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: B12-${{ matrix.name }}-APK
           path: app/android/app/build/outputs/apk/debug/app-debug.apk
+          
