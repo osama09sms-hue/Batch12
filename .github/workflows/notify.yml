@@ -1,1 +1,76 @@
-
+name: Notify
+on:
+schedule:
+- cron: '*/5 * * * *'
+workflow_dispatch:
+permissions:
+contents: write
+concurrency: notify
+jobs:
+notify:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- name: Restore state
+run: |
+git fetch origin state --depth=1 && git show FETCH_HEAD:state.json > $RUNNER_TEMP/state.json || echo '{}' > $RUNNER_TEMP/state.json
+- name: Send notifications
+env:
+OS_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
+STATE: ${{ runner.temp }}/state.json
+run: |
+node - <<'JS'
+const fs = require('fs');
+const P = 'batch-12-fb6bb', K = 'AIzaSyAdq7CDSqQ7depq4z04rIe23fnkZkn8qcY', APP = '107663d0-b84a-4b8d-a713-c143d59bae83';
+const base = https://firestore.googleapis.com/v1/projects/${P}/databases/(default)/documents;
+let st = {};
+try { st = JSON.parse(fs.readFileSync(process.env.STATE, 'utf8')); } catch (e) {}
+const f = (d, k) => { const v = (d.fields || {})[k]; return v ? String(v.stringValue ?? v.integerValue ?? '') : ''; };
+const cols = {
+lectures: d => ['📄 محاضرة جديدة: ' + f(d, 'title'), 'افتح التطبيق للمشاهدة'],
+news: d => ['📰 ' + f(d, 'title'), f(d, 'body').slice(0, 100) || 'خبر جديد'],
+events: d => ['📅 ' + f(d, 'title'), (f(d, 'date') + ' ' + f(d, 'time')).trim()],
+archive: d => ['📁 ' + f(d, 'title'), 'ملف جديد في الأرشيف'],
+questions: d => ['🧠 سؤال جديد', 'تمت إضافة أسئلة جديدة في بنك الأسئلة']
+};
+async function send(h, b) {
+const r = await fetch('https://api.onesignal.com/notifications', {
+method: 'POST',
+headers: { 'content-type': 'application/json; charset=utf-8', authorization: 'Key ' + process.env.OS_KEY },
+body: JSON.stringify({ app_id: APP, target_channel: 'push', headings: { en: h, ar: h }, contents: { en: b || 'B12', ar: b || 'B12' }, included_segments: ['Subscribed Users'] })
+});
+const j = await r.json().catch(() => ({}));
+console.log('send', r.status, JSON.stringify(j));
+return r.ok && !j.errors;
+}
+(async () => {
+if (!process.env.OS_KEY) { console.log('ONESIGNAL_API_KEY secret is missing'); process.exit(1); }
+for (const c of Object.keys(cols)) {
+const r = await fetch(${base}/${c}?pageSize=300&key=${K});
+if (!r.ok) { console.log(c, 'read failed', r.status); continue; }
+const docs = (await r.json()).documents || [];
+const items = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => !isNaN(x.id));
+const max = items.reduce((m, x) => Math.max(m, x.id), 0);
+if (st[c] === undefined) { st[c] = max; console.log(c, 'baseline', max); continue; }
+const fresh = items.filter(x => x.id > st[c]).sort((a, b) => a.id - b.id);
+if (!fresh.length) continue;
+let ok = true;
+if (c === 'questions' || fresh.length > 3) ok = await send(c === 'questions' ? cols.questions().at(0) : 'تحديثات جديدة في B12', fresh.length + ' عنصر جديد');
+else for (const x of fresh) { const [h, b] = colsc; ok = (await send(h, b)) && ok; }
+if (ok) st[c] = max;
+}
+fs.writeFileSync(process.env.STATE, JSON.stringify(st));
+})();
+JS
+- name: Save state
+run: |
+cp $RUNNER_TEMP/state.json /tmp/state.json
+git config user.name "notify-bot"
+git config user.email "bot@users.noreply.github.com"
+git checkout --orphan state-tmp
+git rm -rf . -q
+cp /tmp/state.json state.json
+git add state.json
+git commit -m "state" -q
+git push -f origin HEAD:state
+هندا الملف كامل
