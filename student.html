@@ -171,7 +171,7 @@ const osceView=()=>{if(v.k){const s=OS.find(x=>x.id===v.k)||{},st=s.steps||[],d=
 const osTog=(k,i)=>{const a=OSD(),d=a[k]||[];a[k]=d.includes(i)?d.filter(x=>x!==i):[...d,i];sv0('b12os',a);draw()},osReset=k=>{const a=OSD();delete a[k];sv0('b12os',a);draw()};
 const archView=()=>`<h3>📁 ${t('arch')}</h3>`+([...AR].sort((a,b)=>String(b.year).localeCompare(String(a.year))).map(a=>`<div class="card it" onclick="window.open(this.dataset.u,'_blank')" data-u="${esc(a.url)}"><span class="n">📄</span><div style="flex:1"><b>${esc(a.title)}</b><div class="m">${esc((S.find(s=>s.id===String(a.sid))||{}).name||'')} · ${esc(a.year||'')} ${esc(a.level||'')}</div></div></div>`).join('')||emp(t('none')));
 const rep2=id=>{const x=prompt(t('reportq'));if(!x)return;addDoc(collection(db,'reports'),{kind:'lecture',ref:id,txt:x,by:me.n,t:Date.now()}).then(()=>alert(t('reported'))).catch(e=>alert(e.code||e.message))};
-const initPush=()=>{try{if(window.B12OS)window.B12OS.init('107663d0-b84a-4b8d-a713-c143d59bae83')}catch(e){}};
+const initPush=()=>{try{if(window.B12OS){window.B12OS.init('107663d0-b84a-4b8d-a713-c143d59bae83');if(me&&me.pid)window.B12OS.login(me.pid)}}catch(e){}};
 apply();if(me){loadAll().then(draw);initPush()}draw();setInterval(()=>refreshMsgs(),4000);
 setTimeout(()=>{const x=$('sp');if(x){x.style.opacity=0;setTimeout(()=>x.remove(),700)}},3000);Object.assign(window,{fcStart,fcFlip,fcAns,osTog,osReset,srchIn,dictIn,rep2,speak,qStart,qAns,qNext,qRestart,calc,done,ntAll,ntClr,ntGo,askN,rep,rpx,fav,hs,$,reg,go,out,filt,setC,setWp,setPhoto,addStory,openSt,stGo,zoom,tog,sendMsg,sendImg,mic});
 </script></body></html>
