@@ -38,7 +38,7 @@ jobs:
           cp ../sw.js www/
           cat > os-entry.js <<'JS'
           import OneSignal from '@onesignal/capacitor-plugin';
-          window.B12OS = { init: function (id) { OneSignal.initialize(id); return OneSignal.Notifications.requestPermission(false); } };
+          window.B12OS = { init: function (id) { OneSignal.initialize(id); return OneSignal.Notifications.requestPermission(false); }, login: function (x) { OneSignal.login(String(x)); } };
           JS
           npx esbuild os-entry.js --bundle --format=iife --outfile=www/os.js
           printf '%s' '{"appId":"${{ matrix.id }}","appName":"${{ matrix.label }}","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
@@ -46,7 +46,7 @@ jobs:
         working-directory: app
         run: |
           npx cap add android
-          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n <application#' android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.RECORD_AUDIO" />\n    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />\n    <application#' android/app/src/main/AndroidManifest.xml
       - name: Icons
         continue-on-error: true
         working-directory: app
