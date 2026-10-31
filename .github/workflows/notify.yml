@@ -35,13 +35,19 @@ jobs:
             events: d => ['📅 ' + f(d, 'title'), (f(d, 'date') + ' ' + f(d, 'time')).trim()],
             archive: d => ['📁 ' + f(d, 'title'), 'ملف جديد في الأرشيف'],
             questions: d => ['🧠 سؤال جديد', 'تمت إضافة أسئلة جديدة في بنك الأسئلة']
-          };
-          async function send(h, b) {
-            const r = await fetch('https://api.onesignal.com/notifications', {
-              method: 'POST',
-              headers: { 'content-type': 'application/json; charset=utf-8', authorization: 'Key ' + process.env.OS_KEY },
-              body: JSON.stringify({ app_id: APP, target_channel: 'push', headings: { en: h, ar: h }, contents: { en: b || 'B12', ar: b || 'B12' }, included_segments: ['Subscribed Users'] })
-            });
+                    async function send(h, b) {
+            for (const seg of ['Total Subscriptions', 'Subscribed Users', 'Active Subscriptions']) {
+              const r = await fetch('https://api.onesignal.com/notifications', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json; charset=utf-8', authorization: 'Key ' + process.env.OS_KEY },
+                body: JSON.stringify({ app_id: APP, target_channel: 'push', headings: { en: h, ar: h }, contents: { en: b || 'B12', ar: b || 'B12' }, included_segments: [seg] })
+              });
+              const j = await r.json().catch(() => ({}));
+              log('send', seg, r.status, JSON.stringify(j));
+              if (r.ok && !j.errors && j.id) return true;
+            }
+            return false;
+          }
             const j = await r.json().catch(() => ({}));
             log('send', r.status, JSON.stringify(j));
             return r.ok && !j.errors;
