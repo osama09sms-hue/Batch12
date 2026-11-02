@@ -17,6 +17,8 @@ jobs:
       - name: Send notifications
         env:
           OS_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
+          BOT_EMAIL: ${{ secrets.BOT_EMAIL }}
+          BOT_PASSWORD: ${{ secrets.BOT_PASSWORD }}
           STATE: ${{ runner.temp }}/state.json
         run: |
           node - <<'JS'
@@ -26,6 +28,8 @@ jobs:
           const flush = () => { try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '### Notify\n' + out.join('\n') + '\n'); } catch (e) {} };
           const P = 'batch-12-fb6bb', K = 'AIzaSyAdq7CDSqQ7depq4z04rIe23fnkZkn8qcY', APP = '107663d0-b84a-4b8d-a713-c143d59bae83';
           const DB = `https://firestore.googleapis.com/v1/projects/${P}/databases/(default)/documents`;
+          async function idToken() { const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${K}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: process.env.BOT_EMAIL, password: process.env.BOT_PASSWORD, returnSecureToken: true }) }); const j = await r.json(); if (!j.idToken) throw new Error('bot login failed: ' + (j.error && j.error.message)); return j.idToken; }
+          let TOK = '';
           let st = {};
           try { st = JSON.parse(fs.readFileSync(process.env.STATE, 'utf8')); } catch (e) {}
           st.rem = st.rem || {};
@@ -54,9 +58,9 @@ jobs:
             return x.ok;
           }
           async function recent(c, n) {
-            const r = await fetch(`${DB}:runQuery?key=${K}`, {
+            const r = await fetch(`${DB}:runQuery`, {
               method: 'POST',
-              headers: { 'content-type': 'application/json' },
+              headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
               body: JSON.stringify({ structuredQuery: { from: [{ collectionId: c }], orderBy: [{ field: { fieldPath: 't' }, direction: 'DESCENDING' }], limit: n } })
             });
             if (!r.ok) { log(c, 'query failed', r.status); return []; }
@@ -69,15 +73,19 @@ jobs:
             questions: d => ['🧠 سؤال جديد', 'تمت إضافة أسئلة جديدة في بنك الأسئلة'],
             terms: d => ['📖 مصطلح جديد: ' + f(d, 'en'), f(d, 'ar')],
             cards: d => ['🗂️ بطاقة حفظ جديدة', f(d, 'front')],
+            videos: d => ['🎬 فيديو جديد: ' + f(d, 'title'), 'افتح التطبيق للمشاهدة'],
+            polls: d => ['🗳️ استطلاع جديد', f(d, 'q')],
+            atlas: d => ['🫀 أطلس: ' + f(d, 'en'), f(d, 'ar')],
             osce: d => ['🏥 مهارة OSCE جديدة: ' + f(d, 'title'), 'افتح التطبيق للتدريب']
           };
           (async () => {
             const K0 = process.env.OS_KEY || '';
             log('key length', K0.length, 'prefix', K0.slice(0, 10));
             if (!K0) { log('ONESIGNAL_API_KEY secret is missing'); flush(); process.exit(1); }
+            TOK = await idToken();
             const events = [];
             for (const c of Object.keys(cols)) {
-              const r = await fetch(`${DB}/${c}?pageSize=300&key=${K}`);
+              const r = await fetch(`${DB}/${c}?pageSize=300`, { headers: { authorization: 'Bearer ' + TOK } });
               if (!r.ok) { log(c, 'read failed', r.status); continue; }
               const docs = (await r.json()).documents || [];
               const items = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => Number.isSafeInteger(x.id) && x.id > 0);
@@ -95,7 +103,7 @@ jobs:
             // news (random ids, use field t)
             {
               const docs = await recent('news', 20);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0);
+              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
               const max = items.reduce((m, x) => Math.max(m, x.t), 0);
               if (st.news === undefined) { st.news = max; log('news baseline', max); }
               else {
@@ -110,7 +118,7 @@ jobs:
             // private messages (to a specific student via external id = pid)
             {
               const docs = await recent('dms', 30);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0);
+              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
               const max = items.reduce((m, x) => Math.max(m, x.t), 0);
               if (st.dms === undefined) { st.dms = max; log('dms baseline', max); }
               else {
@@ -126,7 +134,7 @@ jobs:
             // class chat digest (at most once per 30 minutes)
             {
               const docs = await recent('messages', 30);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0);
+              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
               const max = items.reduce((m, x) => Math.max(m, x.t), 0);
               if (st.messages === undefined) { st.messages = max; log('messages baseline', max); }
               else {
