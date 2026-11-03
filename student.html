@@ -209,6 +209,9 @@ function drawInner(){if(!me)return login();apply();const p=v.p;if(p==='chat'&&v.
  if(p==='set')h+=settings();
  A.innerHTML=h+'</div>'+nav()}
 const contacts=()=>{const l=DIR.filter(x=>x.id!==me.pid&&(x.name||'').toLowerCase().includes(cq.toLowerCase())).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));return l.map(x=>{const can=!!x.uid&&!!me.pid;return `<div class="card it" style="opacity:${can?1:.6}" onclick="${can?`go('chat','p','${x.id}')`:`alert('${LG('هذا الزميل لم يفعّل حسابه بعد','This classmate has not activated an account yet')}')`}">${avh(x.photo_url)}<div style="flex:1"><b>${esc(x.name)}</b>${x.title?`<div class="m" style="color:var(--p)">${esc(x.title)}</div>`:''}${can?'':`<div class="m">${LG('لم يفعّل حسابه بعد','Not activated yet')}</div>`}</div></div>`}).join('')||emp(t('none'))};
+const subs=()=>{const l=S.filter(s=>(s.name||'').toLowerCase().includes(hq.toLowerCase()));return l.map((s,i)=>`<div class="card it" onclick="go('sub','${s.id}')"><span class="n" style="background:${COL[i%6]}">${IC[i%8]}</span><div style="flex:1"><b>${esc(s.name)}</b><div class="m">${esc(s.doctor)}</div></div><span class="tag">${L.filter(x=>String(x.subject_id)===String(s.id)).length} ${t('lec')}</span></div>`).join('')||emp(t('nosub'))};
+const hs=q=>{hq=q;const el=$('sl');if(el)el.innerHTML=subs()};
+const fav=id=>{FAV=FAV.includes(id)?FAV.filter(x=>x!==id):[...FAV,id];try{localStorage.setItem('b12fav',JSON.stringify(FAV))}catch(e){}draw()};
 function filt(q){cq=q;$('cl').innerHTML=contacts()}
 function settings(){
  const sel=(k,a)=>a.map(([x,n])=>`<option value="${x}" ${String(cfg[k])===x?'selected':''}>${n}</option>`).join('');
