@@ -1,10 +1,10 @@
 {
- "id": "b12-student",
+ "id": "./student.html",
  "name": "B12 تمريض",
  "short_name": "B12",
  "description": "B12 Nursing",
  "start_url": "./student.html",
- "scope": "./",
+ "scope": "./student.html",
  "display": "standalone",
  "orientation": "portrait",
  "background_color": "#0a1626",

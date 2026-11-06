@@ -1,10 +1,10 @@
 {
- "id": "b12-admin",
+ "id": "./admin.html",
  "name": "B12 الإدارة",
  "short_name": "B12 Admin",
  "description": "B12 Nursing",
  "start_url": "./admin.html",
- "scope": "./",
+ "scope": "./admin.html",
  "display": "standalone",
  "orientation": "portrait",
  "background_color": "#0a1626",
