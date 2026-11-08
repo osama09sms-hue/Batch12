@@ -1,15 +1,16 @@
-/* ===== B12 THEME (paste once, right before the first </style>) ===== */
+/* ===== B12 THEME (!important so it wins over the app's own inline styles) ===== */
 :root{
-  --bg:#0b1220;      /* page background */
-  --c:#131e33;       /* cards */
-  --c2:#1c2a45;      /* secondary surfaces */
-  --t:#eef4fb;       /* main text */
-  --m:#93a8c4;       /* muted text */
-  --p:#14b8a6;       /* primary colour: buttons, titles, active tabs */
-  --a:#6366f1;       /* accent colour: gradients */
-  --b:#26395c;       /* borders */
+  --bg:#0b1220 !important;   /* page background */
+  --c:#131e33 !important;    /* cards */
+  --c2:#1c2a45 !important;   /* secondary surfaces */
+  --t:#eef4fb !important;    /* main text */
+  --m:#93a8c4 !important;    /* muted text */
+  --p:#14b8a6 !important;    /* primary colour */
+  --a:#6366f1 !important;    /* accent colour */
+  --b:#26395c !important;    /* borders */
 }
-.hero{background:linear-gradient(135deg,#0f766e,#1e40af)!important;box-shadow:0 10px 26px #0f766e44!important}
-button{border-radius:14px}
-button:not(.g){background:linear-gradient(135deg,var(--p),var(--a))!important;color:#fff!important}
-.card{border:1px solid var(--b)}
+body{background:var(--bg) !important;color:var(--t) !important}
+.hero{background:linear-gradient(135deg,#0f766e,#1e40af) !important;box-shadow:0 10px 26px #0f766e44 !important}
+button:not(.g){background:linear-gradient(135deg,var(--p),var(--a)) !important;color:#fff !important;border-radius:14px !important}
+.card{border:1px solid var(--b) !important}
+/* ===== END THEME ===== */
