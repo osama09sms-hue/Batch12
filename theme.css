@@ -14,3 +14,8 @@ body{background:var(--bg) !important;color:var(--t) !important}
 button:not(.g){background:linear-gradient(135deg,var(--p),var(--a)) !important;color:#fff !important;border-radius:14px !important}
 .card{border:1px solid var(--b) !important}
 /* ===== END THEME ===== */
+/* ===== WhatsApp-style message bubbles ===== */
+.b.me{background:#005c4b !important;color:#e9edef !important;border-radius:10px 10px 2px 10px !important}
+.b:not(.me){background:#202c33 !important;color:#e9edef !important;border-radius:10px 10px 10px 2px !important}
+.b .tm{color:#8696a0 !important}
+/* ===== END WhatsApp bubbles ===== */
