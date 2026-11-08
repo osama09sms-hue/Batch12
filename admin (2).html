@@ -101,4 +101,169 @@ document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('but
 const netUp=()=>{const el=document.getElementById('net');if(!el)return;const c=navigator.connection;let k=!navigator.onLine?'offline':(c&&c.type==='wifi'?'Wi-Fi':(c&&c.effectiveType?c.effectiveType.toUpperCase():'online'));el.textContent=(navigator.onLine?'🟢 ':'🔴 ')+k};
 if(!document.getElementById('net')){const d=document.createElement('div');d.id='net';d.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%);font-size:11px;padding:2px 10px;border-radius:12px;background:var(--c);border:1px solid var(--b);z-index:9;opacity:.9';document.body.appendChild(d)}
 addEventListener('online',netUp);addEventListener('offline',netUp);try{navigator.connection&&navigator.connection.addEventListener('change',netUp)}catch(e){}netUp();
-</script></body></html>
+</script>
+<style>
+/* =================================
+   BATCH 12 - PREMIUM UI ENHANCEMENT
+   ================================= */
+
+:root {
+  --b12-primary: #2563eb;
+  --b12-secondary: #7c3aed;
+  --b12-background: #f1f5f9;
+  --b12-surface: #ffffff;
+  --b12-text: #172554;
+  --b12-radius: 16px;
+  --b12-shadow: 0 8px 25px rgba(15,23,42,.08);
+}
+
+/* General appearance */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Cairo", "Tajawal", Arial, sans-serif;
+  background-color: var(--b12-background);
+  color: var(--b12-text);
+}
+
+/* Smooth transitions */
+button, a, input, select, textarea,
+.card, .stat-card, .dashboard-card {
+  transition: all .25s ease !important;
+}
+
+/* Buttons */
+button, .btn, [type="button"], [type="submit"] {
+  border-radius: 12px !important;
+  cursor: pointer;
+  font-weight: 700 !important;
+}
+
+button:hover, .btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 7px 18px rgba(37,99,235,.18);
+}
+
+button:active {
+  transform: scale(.97);
+}
+
+/* Cards */
+.card, .stat-card, .dashboard-card,
+[class*="card"], [class*="stat"] {
+  border-radius: var(--b12-radius);
+}
+
+.card:hover, .stat-card:hover,
+.dashboard-card:hover {
+  box-shadow: var(--b12-shadow);
+  transform: translateY(-3px);
+}
+
+/* Input fields */
+input, select, textarea {
+  border-radius: 11px !important;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--b12-primary) !important;
+  box-shadow: 0 0 0 3px rgba(37,99,235,.13) !important;
+}
+
+/* Tables */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  width: 100%;
+}
+
+th {
+  font-weight: 800;
+}
+
+td, th {
+  padding: 13px 12px;
+}
+
+tbody tr:hover {
+  background: rgba(37,99,235,.055);
+}
+
+/* Navigation */
+nav, aside {
+  transition: all .3s ease;
+}
+
+nav a:hover, aside a:hover {
+  color: var(--b12-primary);
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Modals and dialogs */
+.modal, dialog, [role="dialog"] {
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 20px;
+}
+
+/* Selection */
+::selection {
+  background: #2563eb;
+  color: white;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .card, .stat-card, .dashboard-card {
+    border-radius: 13px;
+  }
+
+  table {
+    font-size: 13px;
+  }
+
+  td, th {
+    padding: 9px 7px;
+  }
+
+  button {
+    max-width: 100%;
+  }
+}
+
+/* Accessibility */
+:focus-visible {
+  outline: 3px solid rgba(37,99,235,.5);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</body></html>
