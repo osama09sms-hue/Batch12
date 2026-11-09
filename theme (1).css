@@ -1,15 +1,31 @@
-/* ===== B12 THEME (paste once, right before the first </style>) ===== */
+/* ===== B12 THEME (!important so it wins over the app's own inline styles) ===== */
 :root{
-  --bg:#0b1220;      /* page background */
-  --c:#131e33;       /* cards */
-  --c2:#1c2a45;      /* secondary surfaces */
-  --t:#eef4fb;       /* main text */
-  --m:#93a8c4;       /* muted text */
-  --p:#14b8a6;       /* primary colour: buttons, titles, active tabs */
-  --a:#6366f1;       /* accent colour: gradients */
-  --b:#26395c;       /* borders */
+  --bg:#0b1220 !important;   /* page background */
+  --c:#131e33 !important;    /* cards */
+  --c2:#1c2a45 !important;   /* secondary surfaces */
+  --t:#eef4fb !important;    /* main text */
+  --m:#93a8c4 !important;    /* muted text */
+  --p:#14b8a6 !important;    /* primary colour */
+  --a:#6366f1 !important;    /* accent colour */
+  --b:#26395c !important;    /* borders */
 }
-.hero{background:linear-gradient(135deg,#0f766e,#1e40af)!important;box-shadow:0 10px 26px #0f766e44!important}
-button{border-radius:14px}
-button:not(.g){background:linear-gradient(135deg,var(--p),var(--a))!important;color:#fff!important}
-.card{border:1px solid var(--b)}
+body{background:var(--bg) !important;color:var(--t) !important}
+.hero{background:linear-gradient(135deg,#0f766e,#1e40af) !important;box-shadow:0 10px 26px #0f766e44 !important}
+button:not(.g){background:linear-gradient(135deg,var(--p),var(--a)) !important;color:#fff !important;border-radius:14px !important}
+.card{border:1px solid var(--b) !important}
+/* ===== END THEME ===== */
+/* ===== WhatsApp-style message bubbles ===== */
+.b.me{background:#005c4b !important;color:#e9edef !important;border-radius:10px 10px 2px 10px !important}
+.b:not(.me){background:#202c33 !important;color:#e9edef !important;border-radius:10px 10px 10px 2px !important}
+.b .tm{color:#8696a0 !important}
+/* ===== END WhatsApp bubbles ===== */
+/* ===== WhatsApp-style chat list ===== */
+.card.it{background:transparent !important;border:none !important;border-bottom:1px solid var(--b) !important;border-radius:0 !important;padding:12px 4px !important}
+.card.it .n{border-radius:50% !important;width:52px !important;height:52px !important;min-width:52px !important;font-size:20px}
+.card.it b{font-size:16px;font-weight:600}
+.card.it .m{color:var(--m)}
+.nav{border-radius:0 !important;background:var(--c) !important;border-top:1px solid var(--b) !important;box-shadow:none !important;bottom:0 !important;left:0 !important;right:0 !important;max-width:100% !important}
+.nav button{background:transparent !important;color:var(--m) !important;box-shadow:none !important}
+.nav button.on{color:var(--p) !important}
+.nav button.on svg{stroke:var(--p) !important}
+/* ===== END WhatsApp list ===== */
