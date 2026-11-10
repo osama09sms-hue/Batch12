@@ -29,3 +29,17 @@ button:not(.g){background:linear-gradient(135deg,var(--p),var(--a)) !important;c
 .nav button.on{color:var(--p) !important}
 .nav button.on svg{stroke:var(--p) !important}
 /* ===== END WhatsApp list ===== */
+/* ===== WhatsApp list rows ===== */
+.wa-r{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--b);cursor:pointer}
+.wa-av{width:52px;height:52px;min-width:52px;border-radius:50%;background:var(--c2);display:grid;place-items:center;font-size:20px;color:var(--t);overflow:hidden;font-weight:700}
+.wa-av img{width:100%;height:100%;object-fit:cover}
+.wa-t{flex:1;min-width:0}
+.wa-n{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-p{font-size:14px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-tm{font-size:12px;color:var(--m);align-self:flex-start;white-space:nowrap}
+/* ===== END WhatsApp rows ===== */
+/* ===== WhatsApp-style status rings ===== */
+.sr.new{padding:3px;border-radius:50%;background:linear-gradient(45deg,#14b8a6,#6366f1,#22c55e)}
+.sr.seen{padding:3px;border-radius:50%;background:#64748b}
+.sr.new>*,.sr.seen>*{border:3px solid var(--bg) !important;border-radius:50%}
+/* ===== END status rings ===== */
