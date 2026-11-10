@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="ar" dir="rtl" data-th="dark"><head><title>B12 الإدارة</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+<!DOCTYPE html><html lang="ar" dir="rtl" data-th="dark"><head>
+<link rel="stylesheet" href="theme.css?v=1">
+<script src="custom.js?v=1" defer></script><title>B12 الإدارة</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>
 :root{--bg:#0a1626;--c:#12233d;--c2:#1a3050;--t:#eaf2fb;--m:#8fa6c2;--p:#12b5a6;--a:#3b82f6;--b:#1f3656;--fs:16px;--ff:system-ui,Tahoma,sans-serif;box-sizing:border-box}
 [data-th=light]{--bg:#eef3f9;--c:#fff;--c2:#e6eef8;--t:#0d2038;--m:#62758d;--b:#d9e3ef}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--t);font-family:var(--ff);font-size:var(--fs)}
@@ -40,7 +42,7 @@ body.busy::after{content:'🚑';position:fixed;top:6px;font-size:26px;z-index:70
 window.addEventListener('error',e=>{let b=document.getElementById('errbox');if(!b){b=document.createElement('div');b.id='errbox';b.style.cssText='position:fixed;left:8px;right:8px;top:60px;z-index:200;background:#7f1d1d;color:#fff;padding:10px;border-radius:12px;font-size:12px;max-height:45vh;overflow:auto;direction:ltr;text-align:left';document.body.appendChild(b)}b.textContent='JS: '+e.message});
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import{getFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,deleteDoc,query,orderBy,limit}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import{getFirestore,collection,doc,getDoc,getDocs,setDoc,addDoc,deleteDoc,query,orderBy,limit,where}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import{getAuth,signInWithEmailAndPassword,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 const app0=initializeApp({apiKey:"AIzaSyAdq7CDSqQ7depq4z04rIe23fnkZkn8qcY",authDomain:"batch-12-fb6bb.firebaseapp.com",projectId:"batch-12-fb6bb",storageBucket:"batch-12-fb6bb.firebasestorage.app",messagingSenderId:"395362401804",appId:"1:395362401804:web:8c4a1d22723370a3ef7829"});
 const db=getFirestore(app0),auth=getAuth(app0);
@@ -65,9 +67,10 @@ const GEN={changelog:{t:'سجل التحديثات',ic:'🧾',f:[],show:d=>d.wha
 let gk='events';const GD={};
 const setG=k=>{gk=k;draw()};
 let OSR='';
-async function pushAll(h,b,v){const tk=localStorage.getItem('b12gh'),tm=()=>new Date().toLocaleTimeString();if(!tk){OSR=tm()+' — لا يوجد GitHub token محفوظ (الإرسال سيتم خلال دقائق من الجدولة التلقائية)';if(v)draw();return}try{const r=await fetch('https://api.github.com/repos/osama09sms-hue/Batch12/actions/workflows/notify.yml/dispatches',{method:'POST',headers:{accept:'application/vnd.github+json',authorization:'Bearer '+tk,'content-type':'application/json'},body:JSON.stringify({ref:'main'})});OSR=tm()+' — '+(r.status===204?'تم تشغيل الإرسال، يصل خلال أقل من دقيقة تقريباً':'فشل ('+r.status+'): تأكد من صلاحية الـ token')}catch(e){OSR=tm()+' — تعذّر الاتصال: '+e.message}if(v||/فشل|تعذّر/.test(OSR))draw()}
-const saveOsk=()=>{const v=$('osk').value.trim();if(!v)return;try{localStorage.setItem('b12gh',v);alert('تم الحفظ في هذا الجهاز فقط')}catch(e){alert('تعذّر الحفظ')}};
-function genView(){const c=GEN[gk];let h='<div class="card"><b>👤 ملف طالب</b><input id="sq" placeholder="الرقم الجامعي أو الاسم"><button onclick="findStudent()">عرض</button><div id="sbox"></div></div>'+'<div class="card"><button onclick="cleanStories()">🧹 حذف الحالات المنتهية (أكثر من 24 ساعة)</button> <button class="g" onclick="expAll()">📤 تصدير كل البيانات</button></div>'+'<div class="card"><b>🔔 إعدادات الإشعارات</b><div class="m">ألصق GitHub token لإرسال الإشعارات فوراً (يُحفظ في جهازك فقط) · نسخة 3.2</div><input id="osk" type="password" placeholder="GitHub token"><button onclick="saveOsk()">حفظ</button> <button class="g" onclick="pushAll(\'🔔 اختبار B12\',\'وصل الإشعار بنجاح\',true)">إرسال اختبار</button><div class="m" style="margin-top:8px">'+esc(OSR)+'</div></div><div class="card"><b>استيراد طلاب دفعة واحدة</b><div class="m">كل سطر: الرقم الجامعي,الاسم</div><textarea id="gst" rows="4"></textarea><button onclick="importSt()">استيراد</button></div><div class="tabs">'+Object.keys(GEN).map(k=>'<button class="'+(k===gk?'':'g')+'" onclick="setG(\''+k+'\')">'+GEN[k].ic+' '+GEN[k].t+'</button>').join('')+'</div>';if(c.f.length)h+='<div class="card"><b>إضافة: '+c.t+'</b>'+c.f.map(([k,l,ty])=>ty==='subj'?'<select id="g_'+k+'"><option value="">— المادة (اختياري) —</option>'+SU.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('')+'</select>':(ty==='area'||ty==='area1')?'<textarea id="g_'+k+'" rows="5" placeholder="'+l+'"></textarea>':'<input id="g_'+k+'" placeholder="'+l+'">').join('')+'<button onclick="addG()">حفظ</button></div>';(GD[gk]||[]).forEach(d=>h+='<div class="card it"><div style="flex:1"><b>'+esc(c.show(d))+'</b></div>'+(c.act?c.act(d):'')+'<button class="g" onclick="del(\''+gk+'\',\'id\',\''+d.id+'\')">حذف</button></div>');return h}
+const WORKER_URL='https://icy-wood-8abeb12.osama09sms.workers.dev';
+async function pushAll(h,b,v){const tm=()=>new Date().toLocaleTimeString();OSR=tm()+' — جاري الإرسال...';if(v)draw();try{const tk=await auth.currentUser.getIdToken();const r=await fetch(WORKER_URL,{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+tk},body:JSON.stringify({title:String(h||''),body:String(b||'')})});OSR=tm()+' — '+(r.ok?'تم الإرسال فوراً':'فشل ('+r.status+')')}catch(e){OSR=tm()+' — تعذّر الاتصال: '+e.message}draw()}
+const saveOsk=()=>{alert('تم إلغاء حفظ التوكن لأسباب أمنية. الإشعارات بتتبعت تلقائياً.')};
+function genView(){const c=GEN[gk];let h='<div class="card"><b>👥 اسم الدردشة العامة</b><input id="gname" placeholder="الاسم الظاهر للطلبة"><button onclick="saveGeneralName()">حفظ</button><div class="m">صورة الدردشة العامة:</div><input type="file" accept="image/*" onchange="saveGeneralPhoto(this.files[0])"></div>'+'<div class="card"><b>💬 رسالة خاصة للطلبة</b><div class="m">الطلبة بيشوفوا الإدارة في قائمة الزملاء. اضغط "إنشاء جهة الإدارة" مرة واحدة.</div><button onclick="dmAdmin()">إنشاء جهة الإدارة للطلبة</button> <button class="g" onclick="dmPick()">اختار طالب</button><div id="dmbox"></div></div>'+'<div class="card"><b>👤 ملف طالب</b><input id="sq" placeholder="الرقم الجامعي أو الاسم"><button onclick="findStudent()">عرض</button><div id="sbox"></div></div>'+'<div class="card"><button onclick="cleanStories()">🧹 حذف الحالات المنتهية (أكثر من 24 ساعة)</button> <button class="g" onclick="expAll()">📤 تصدير كل البيانات</button></div>'+'<div class="card"><b>🔔 إعدادات الإشعارات</b><div class="m">الإشعارات بتتبعت تلقائياً كل 5 دقايق (مفيش إعداد مطلوب)</div><div class="m" style="margin-top:8px">'+esc(OSR)+'</div></div><div class="card"><b>استيراد طلاب دفعة واحدة</b><div class="m">كل سطر: الرقم الجامعي,الاسم</div><textarea id="gst" rows="4"></textarea><button onclick="importSt()">استيراد</button></div><div class="tabs">'+Object.keys(GEN).map(k=>'<button class="'+(k===gk?'':'g')+'" onclick="setG(\''+k+'\')">'+GEN[k].ic+' '+GEN[k].t+'</button>').join('')+'</div>';if(c.f.length)h+='<div class="card"><b>إضافة: '+c.t+'</b>'+c.f.map(([k,l,ty])=>ty==='subj'?'<select id="g_'+k+'"><option value="">— المادة (اختياري) —</option>'+SU.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('')+'</select>':(ty==='area'||ty==='area1')?'<textarea id="g_'+k+'" rows="5" placeholder="'+l+'"></textarea>':'<input id="g_'+k+'" placeholder="'+l+'">').join('')+'<button onclick="addG()">حفظ</button></div>';(GD[gk]||[]).forEach(d=>h+='<div class="card it"><div style="flex:1"><b>'+esc(c.show(d))+'</b></div>'+(c.act?c.act(d):'')+'<button class="g" onclick="del(\''+gk+'\',\'id\',\''+d.id+'\')">حذف</button></div>');return h}
 function replyAsk(id){const r=prompt('اكتب الرد:');if(r)act(setDoc(doc(db,'ask',id),{reply:r,rt:Date.now()},{merge:true}))}
 function addG(){const c=GEN[gk],o={};c.f.forEach(([k,l,ty])=>{const x=$('g_'+k).value.trim();o[k]=ty==='area1'?x:ty==='area'?x.split('\n').map(z=>z.trim()).filter(Boolean):x});if(!c.f.some(([k])=>o[k]&&o[k].length))return;act(setDoc(doc(db,gk,String(Date.now())),o)).then(ok=>ok&&['events','archive'].includes(gk)&&pushAll(gk==='events'?'📅 '+o.title:'📁 '+o.title,gk==='events'?(o.date||'')+' '+(o.time||''):'ملف جديد في الأرشيف'))}
 function importSt(){const ls=$('gst').value.split('\n').map(x=>x.trim()).filter(Boolean),ps=[];ls.forEach(l=>{const p=l.split(/[,;\t]/).map(x=>x.trim());if(p.length<2||!p[0])return;const ex=ST.find(x=>x.id===p[0])||{},pid=ex.pid||Math.random().toString(36).slice(2,10);ps.push(setDoc(doc(db,'students',p[0]),{name:p[1],photo_url:ex.photo_url||'',pid},{merge:true}),setDoc(doc(db,'directory',pid),{name:p[1],photo_url:ex.photo_url||''},{merge:true}))});if(!ps.length)return alert('الصيغة غير صحيحة');act(Promise.all(ps))}
@@ -96,174 +99,20 @@ function selAll(on){document.querySelectorAll('.msel').forEach(x=>x.checked=on)}
 async function delSel(){const sel=[...document.querySelectorAll('.msel:checked')].map(x=>({id:x.value,c:x.dataset.col})).filter(x=>x.id);if(!sel.length)return alert('اختار رسائل أولاً');if(!confirm('حذف '+sel.length+' رسالة؟'))return;const n=await delList(sel);alert('تم حذف '+n);await load();draw()}
 async function clearMsgs(){if(!confirm('سيتم مسح كل الرسائل (العامة والخاصة) نهائياً. متابعة؟'))return;try{const items=[];for(const c of ['messages','dms']){const s=await getDocs(collection(db,c));s.docs.forEach(d=>items.push({id:d.id,c}))}const n=await delList(items);alert('تم مسح '+n+' رسالة');await load();draw()}catch(e){alert(e.message)}}
 async function findStudent(){const q=(($('sq')||{}).value||'').trim();if(!q)return alert('اكتب الرقم الجامعي أو الاسم');try{const sts=await rows('students');const st=sts.find(x=>String(x.id)===q||String(x.name||'').includes(q));if(!st)return alert('لم يتم العثور على الطالب');const pid=String(st.pid||'');const pr=pid?await getDoc(doc(db,'progress',pid)):null;const p=pr&&pr.exists()?pr.data():null;const box=$('sbox');if(!box)return;box.innerHTML=`<div class="card"><b>${esc(st.name||'')}</b><div class="m">الرقم الجامعي: ${esc(String(st.id))}</div>${st.photo_url?`<img src="${esc(st.photo_url)}" style="width:70px;height:70px;border-radius:50%;object-fit:cover">`:''}</div>`+(p?`<div class="card"><b>الإنجازات</b><div class="m">النقاط: ${p.points||0} · الاختبارات: ${p.quizzes||0} · المحاضرات: ${p.lectures||0} · البطاقات: ${p.flashcards||0}</div><div class="m">أيام متتالية: ${p.streak||0} · دقائق المذاكرة: ${p.minutes||0}</div><div class="m">آخر تحديث: ${p.updated?new Date(p.updated).toLocaleString('ar'):'-'}</div></div>`:`<div class="card m">لا توجد بيانات تقدم لهذا الطالب بعد (يحتاج يفتح التطبيق).</div>`)}catch(e){alert(e.code||e.message)}}
-Object.assign(window,{findStudent,delSel,clearMsgs,delOne,selAll,setExs,addEx,cleanStories,expAll,pinMsg,editQ,replyAsk,pushAll,saveOsk,setG,addG,importSt,addQ,addBulk,addN,lg,addT,addS,addL,del,send,setTab});const tone=()=>{try{const c=tone.c||(tone.c=new (window.AudioContext||window.webkitAudioContext)());const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=(c.__t=!c.__t)?880:660;g.gain.value=.04;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.07)}catch(e){}};
+let DMTO=null;
+async function dmAdmin(){try{await setDoc(doc(db,'directory','admin'),{name:'الإدارة',pid:'admin',uid:auth.currentUser.uid,photo_url:''},{merge:true});alert('تم: الطلبة يقدروا يراسلوا الإدارة الآن')}catch(e){alert(e.code||e.message)}}
+async function dmPick(){try{const d=await rows('directory');const pr=await rows('presence').catch(()=>[]);$('dmbox').innerHTML=d.filter(x=>String(x.id)!=='admin').map(x=>{const on=pr.find(p=>String(p.id)===String(x.id)&&Date.now()-p.t<120000);return `<div class="card it" onclick="dmOpen('${x.id}','${esc(x.name||'')}','${x.uid||''}')">${on?'🟢 ':''}${esc(x.name||'')}${x.uid?'':' (لم يسجّل بعد)'}</div>`}).join('')}catch(e){alert(e.code||e.message)}}
+async function dmOpen(pid,name,uid){DMTO={pid,name,uid};const cid=[pid,'admin'].sort().join('_');try{const s=await getDocs(query(collection(db,'dms'),where('p','array-contains',auth.currentUser.uid)));const msgs=s.docs.map(d=>d.data()).filter(x=>x.cid===cid).sort((x,y)=>x.t-y.t).slice(-30);$('dmbox').innerHTML=`<b>${esc(name)}</b>`+(msgs.map(m=>`<div class="bub ${m.uid===auth.currentUser.uid?'me':''}">${esc(m.body||'')}</div>`).join('')||'<div class="m">لا رسائل بعد</div>')+`<textarea id="dmt" rows="2" placeholder="اكتب رسالة..."></textarea><button onclick="dmSend()">إرسال</button>`}catch(e){alert(e.code||e.message)}}
+async function dmSend(){const b=(($('dmt')||{}).value||'').trim();if(!b||!DMTO)return;const cid=[DMTO.pid,'admin'].sort().join('_');try{await addDoc(collection(db,'dms'),{cid,p:DMTO.uid?[auth.currentUser.uid,DMTO.uid]:[auth.currentUser.uid],pp:[DMTO.pid,'admin'],uid:auth.currentUser.uid,sender:'الإدارة',body:b,t:Date.now()});dmOpen(DMTO.pid,DMTO.name,DMTO.uid)}catch(e){alert(e.code||e.message)}}
+setInterval(()=>{try{setDoc(doc(db,'presence','admin'),{t:Date.now(),n:'الإدارة'},{merge:true}).catch(()=>{})}catch(e){}},60000);
+async function saveGeneralName(){const n=(($('gname')||{}).value||'').trim();if(!n)return alert('اكتب الاسم');try{await setDoc(doc(db,'settings','general'),{name:n},{merge:true});alert('تم تغيير اسم الدردشة العامة')}catch(e){alert(e.code||e.message)}}
+window.saveGeneralName=(...x)=>saveGeneralName(...x);
+window.saveGeneralPhoto=(...x)=>saveGeneralPhoto(...x);
+async function saveGeneralPhoto(f){if(!f)return;try{const url=URL.createObjectURL(f);const im=new Image();await new Promise((res,rej)=>{im.onload=res;im.onerror=rej;im.src=url});const k=Math.min(1,160/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(url);const data=c.toDataURL('image/jpeg',.7);await setDoc(doc(db,'settings','general'),{photo:data},{merge:true});alert('تم تغيير صورة الدردشة العامة')}catch(e){alert(e.code||e.message)}}
+
+Object.assign(window,{saveGeneralName,dmAdmin,dmPick,dmOpen,dmSend,findStudent,delSel,clearMsgs,delOne,selAll,setExs,addEx,cleanStories,expAll,pinMsg,editQ,replyAsk,pushAll,saveOsk,setG,addG,importSt,addQ,addBulk,addN,lg,addT,addS,addL,del,send,setTab});const tone=()=>{try{const c=tone.c||(tone.c=new (window.AudioContext||window.webkitAudioContext)());const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=(c.__t=!c.__t)?880:660;g.gain.value=.04;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.07)}catch(e){}};
 document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('button,.it,.tl,.opt,.rxb,.sre,.card'))tone()},true);
 const netUp=()=>{const el=document.getElementById('net');if(!el)return;const c=navigator.connection;let k=!navigator.onLine?'offline':(c&&c.type==='wifi'?'Wi-Fi':(c&&c.effectiveType?c.effectiveType.toUpperCase():'online'));el.textContent=(navigator.onLine?'🟢 ':'🔴 ')+k};
 if(!document.getElementById('net')){const d=document.createElement('div');d.id='net';d.style.cssText='position:fixed;bottom:84px;left:50%;transform:translateX(-50%);font-size:11px;padding:2px 10px;border-radius:12px;background:var(--c);border:1px solid var(--b);z-index:9;opacity:.9';document.body.appendChild(d)}
 addEventListener('online',netUp);addEventListener('offline',netUp);try{navigator.connection&&navigator.connection.addEventListener('change',netUp)}catch(e){}netUp();
-</script>
-<style>
-/* =================================
-   BATCH 12 - PREMIUM UI ENHANCEMENT
-   ================================= */
-
-:root {
-  --b12-primary: #2563eb;
-  --b12-secondary: #7c3aed;
-  --b12-background: #f1f5f9;
-  --b12-surface: #ffffff;
-  --b12-text: #172554;
-  --b12-radius: 16px;
-  --b12-shadow: 0 8px 25px rgba(15,23,42,.08);
-}
-
-/* General appearance */
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: "Cairo", "Tajawal", Arial, sans-serif;
-  background-color: var(--b12-background);
-  color: var(--b12-text);
-}
-
-/* Smooth transitions */
-button, a, input, select, textarea,
-.card, .stat-card, .dashboard-card {
-  transition: all .25s ease !important;
-}
-
-/* Buttons */
-button, .btn, [type="button"], [type="submit"] {
-  border-radius: 12px !important;
-  cursor: pointer;
-  font-weight: 700 !important;
-}
-
-button:hover, .btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.06);
-  box-shadow: 0 7px 18px rgba(37,99,235,.18);
-}
-
-button:active {
-  transform: scale(.97);
-}
-
-/* Cards */
-.card, .stat-card, .dashboard-card,
-[class*="card"], [class*="stat"] {
-  border-radius: var(--b12-radius);
-}
-
-.card:hover, .stat-card:hover,
-.dashboard-card:hover {
-  box-shadow: var(--b12-shadow);
-  transform: translateY(-3px);
-}
-
-/* Input fields */
-input, select, textarea {
-  border-radius: 11px !important;
-  outline: none;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: var(--b12-primary) !important;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.13) !important;
-}
-
-/* Tables */
-table {
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow: hidden;
-  border-radius: 13px;
-  width: 100%;
-}
-
-th {
-  font-weight: 800;
-}
-
-td, th {
-  padding: 13px 12px;
-}
-
-tbody tr:hover {
-  background: rgba(37,99,235,.055);
-}
-
-/* Navigation */
-nav, aside {
-  transition: all .3s ease;
-}
-
-nav a:hover, aside a:hover {
-  color: var(--b12-primary);
-}
-
-/* Images */
-img {
-  max-width: 100%;
-  height: auto;
-}
-
-/* Modals and dialogs */
-.modal, dialog, [role="dialog"] {
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.18);
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 20px;
-}
-
-/* Selection */
-::selection {
-  background: #2563eb;
-  color: white;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-  .card, .stat-card, .dashboard-card {
-    border-radius: 13px;
-  }
-
-  table {
-    font-size: 13px;
-  }
-
-  td, th {
-    padding: 9px 7px;
-  }
-
-  button {
-    max-width: 100%;
-  }
-}
-
-/* Accessibility */
-:focus-visible {
-  outline: 3px solid rgba(37,99,235,.5);
-  outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
-}
-</style>
-</body></html>
+</script></body></html>
