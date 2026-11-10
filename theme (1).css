@@ -29,3 +29,28 @@ button:not(.g){background:linear-gradient(135deg,var(--p),var(--a)) !important;c
 .nav button.on{color:var(--p) !important}
 .nav button.on svg{stroke:var(--p) !important}
 /* ===== END WhatsApp list ===== */
+/* ===== WhatsApp list rows ===== */
+.wa-r{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--b);cursor:pointer}
+.wa-av{width:52px;height:52px;min-width:52px;border-radius:50%;background:var(--c2);display:grid;place-items:center;font-size:20px;color:var(--t);overflow:hidden;font-weight:700}
+.wa-av img{width:100%;height:100%;object-fit:cover}
+.wa-t{flex:1;min-width:0}
+.wa-n{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-p{font-size:14px;color:var(--m);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wa-tm{font-size:12px;color:var(--m);align-self:flex-start;white-space:nowrap}
+/* ===== END WhatsApp rows ===== */
+/* ===== WhatsApp-style status rings ===== */
+.sr.new{padding:3px;border-radius:50%;background:linear-gradient(45deg,#14b8a6,#6366f1,#22c55e)}
+.sr.seen{padding:3px;border-radius:50%;background:#64748b}
+.sr.new>*,.sr.seen>*{border:3px solid var(--bg) !important;border-radius:50%}
+/* ===== END status rings ===== */
+/* ===== WhatsApp-style chat screen ===== */
+.cw{background:#0b141a !important;background-image:radial-gradient(circle at 20% 30%,#ffffff08 1px,transparent 1.5px),radial-gradient(circle at 70% 60%,#ffffff06 1px,transparent 1.5px) !important;background-size:26px 26px,34px 34px !important;border-radius:0 !important}
+.ms{padding:8px 6px !important}
+.b{max-width:78% !important;padding:6px 9px 4px !important;font-size:15px;line-height:1.45;box-shadow:0 1px 1px #0005}
+.b .tm{font-size:11px;text-align:right;margin-top:2px}
+.ib2{background:#1f2c34 !important;border-radius:26px !important;padding:6px 8px !important;border:none !important;box-shadow:none !important}
+.ib2 textarea{background:#2a3942 !important;border:none !important;border-radius:20px !important;color:#e9edef !important}
+.ib2 .ib{color:#8696a0 !important;background:transparent !important}
+.ib2 .snd{background:#00a884 !important;border-radius:50% !important;width:46px !important;height:46px !important;display:grid;place-items:center;padding:0 !important}
+.ch{background:#1f2c34 !important;color:#e9edef !important}
+/* ===== END WhatsApp chat ===== */
