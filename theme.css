@@ -92,3 +92,8 @@ img.tw{width:1.05em !important;height:1.05em !important;vertical-align:-0.18em !
 .card button{font-size:13px !important;padding:7px 12px !important}
 .hero{padding:10px !important}
 /* ===== END normal sizes ===== */
+/* ===== AI chat: make the input always visible and tappable ===== */
+#aiq,.ib2 textarea{pointer-events:auto !important;position:relative !important;z-index:500 !important;-webkit-user-select:text !important;user-select:text !important;min-height:40px;width:100%;opacity:1 !important;visibility:visible !important}
+.ib2{position:relative !important;z-index:400 !important;pointer-events:auto !important;display:flex !important;align-items:flex-end !important;gap:6px}
+#aiout,#aich{pointer-events:auto !important}
+/* ===== END AI input fix ===== */
