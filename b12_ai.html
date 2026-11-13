@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>B12 AI</title>
+<style>
+:root{--bg:#171717;--side:#0f0f0f;--card:#212121;--line:#2f2f2f;--t:#ececec;--m:#9b9b9b;--acc:#d97757}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--t);font-family:system-ui,Tahoma,sans-serif}
+body{display:flex;height:100dvh;overflow:hidden}
+aside{width:260px;background:var(--side);display:flex;flex-direction:column;padding:10px;border-left:1px solid var(--line);transition:.2s}
+aside.hide{margin-right:-260px}
+.btn{background:transparent;color:var(--t);border:0;border-radius:10px;padding:9px 10px;text-align:right;cursor:pointer;font-size:14px;width:100%;display:flex;gap:8px;align-items:center}
+.btn:hover{background:#2a2a2a}
+.brand{font-size:20px;font-weight:600;padding:6px 8px;margin-bottom:6px;color:#fff}
+.sec{color:var(--m);font-size:12px;padding:12px 10px 4px}
+.list{overflow:auto;flex:1}
+.item{padding:8px 10px;border-radius:10px;cursor:pointer;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item:hover,.item.on{background:#2a2a2a}
+.foot{border-top:1px solid var(--line);padding:10px;font-size:13px;color:var(--m);display:flex;justify-content:space-between;align-items:center}
+main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+.top{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid transparent}
+.top .model{font-size:15px;color:var(--t);padding:6px 10px;border-radius:10px;background:#2a2a2a}
+.ico{background:transparent;border:0;color:var(--t);font-size:18px;cursor:pointer;padding:6px 8px;border-radius:8px}
+.ico:hover{background:#2a2a2a}
+#feed{flex:1;overflow:auto;padding:18px 0}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.hello{text-align:center;margin-top:12vh}
+.hello h1{font-size:30px;font-weight:500;margin:0 0 22px;color:#f0f0f0}
+.hello h1 span{color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+.chip{background:#212121;border:1px solid var(--line);color:var(--t);padding:8px 14px;border-radius:18px;cursor:pointer;font-size:14px}
+.chip:hover{background:#2a2a2a}
+.msg{margin:18px 0;display:flex}
+.msg.u{justify-content:flex-start}
+.bubble{max-width:100%;line-height:1.75;font-size:16px;white-space:pre-wrap;word-wrap:break-word}
+.msg.u .bubble{background:#2f2f2f;padding:10px 14px;border-radius:18px;max-width:80%}
+.msg.a .bubble{width:100%}
+.bubble code{background:#2b2b2b;padding:2px 6px;border-radius:6px;font-size:14px;direction:ltr;display:inline-block}
+.bubble pre{background:#111;padding:12px;border-radius:10px;overflow:auto;direction:ltr;text-align:left}
+.bubble b{font-weight:700}
+.bar{display:flex;gap:6px;margin-top:6px;color:var(--m);font-size:13px}
+.bar button{background:transparent;border:0;color:var(--m);cursor:pointer;padding:4px 6px;border-radius:6px}
+.bar button:hover{background:#2a2a2a;color:var(--t)}
+.dots::after{content:'…';animation:d 1s steps(3,end) infinite}
+@keyframes d{0%{content:''}33%{content:'.'}66%{content:'..'}100%{content:'...'}}
+.composer{padding:10px 16px 18px}
+.box{max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:26px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.box textarea{background:transparent;border:0;outline:0;color:var(--t);font-size:16px;resize:none;min-height:28px;max-height:180px;font-family:inherit;padding:6px 8px;direction:rtl}
+.row{display:flex;align-items:center;gap:6px}
+.round{width:34px;height:34px;border-radius:50%;border:0;background:#2a2a2a;color:var(--t);cursor:pointer;font-size:16px;display:grid;place-items:center}
+.round.send{margin-inline-start:auto;background:var(--t);color:#111}
+.round:disabled{opacity:.4;cursor:default}
+.files{font-size:12px;color:var(--m);padding:0 8px}
+.note{text-align:center;color:var(--m);font-size:12px;padding:8px}
+.login{max-width:340px;margin:12vh auto;padding:22px;background:var(--card);border-radius:18px;border:1px solid var(--line)}
+.login input{width:100%;margin:6px 0;padding:11px;border-radius:10px;border:1px solid var(--line);background:#111;color:var(--t);font-size:15px}
+.login button{width:100%;padding:11px;border-radius:10px;border:0;background:var(--t);color:#111;font-weight:600;cursor:pointer;margin-top:6px}
+.err{color:#ff8a8a;font-size:13px;min-height:18px}
+.hide-s{display:none}
+@media(max-width:760px){aside{position:fixed;inset:0 auto 0 0;z-index:10;width:270px}aside.hide{margin-right:0;transform:translateX(100%)}}
+</style>
+</head>
+<body>
+<aside id="side">
+  <div class="brand">B12 AI</div>
+  <button class="btn" onclick="newChat()">＋ محادثة جديدة</button>
+  <button class="btn" onclick="searchChats()">🔍 بحث في المحادثات</button>
+  <div class="sec">المحادثات</div>
+  <div class="list" id="list"></div>
+  <div class="foot"><span id="who">—</span><button class="ico" onclick="logout()" title="خروج">⎋</button></div>
+</aside>
+
+<main>
+  <div class="top">
+    <button class="ico" onclick="toggleSide()" title="القائمة">☰</button>
+    <div class="model">B12 AI · سريع</div>
+    <button class="ico" onclick="newChat()" title="جديد">＋</button>
+  </div>
+  <div id="feed"><div class="wrap" id="wrap"></div></div>
+  <div class="composer">
+    <div class="box">
+      <div class="files" id="files"></div>
+      <textarea id="inp" rows="1" placeholder="اسأل أي شيء..." oninput="grow(this)" onkeydown="onKey(event)"></textarea>
+      <div class="row">
+        <label class="round" title="إرفاق صورة أو PDF">＋<input type="file" id="fi" multiple accept="image/png,image/jpeg,image/webp,application/pdf" hidden onchange="pick(this.files)"></label>
+        <button class="round send" id="sendBtn" onclick="send()" title="إرسال">↑</button>
+      </div>
+    </div>
+    <div class="note">الردود بيولدها الذكاء الاصطناعي وممكن تغلط، راجع المهم.</div>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const app = initializeApp({ apiKey: "AIzaSyAdq7CDSqQ7depq4z04rIe23fnkZkn8qcY", authDomain: "batch-12-fb6bb.firebaseapp.com", projectId: "batch-12-fb6bb" });
+const auth = getAuth(app);
+const WORKER = "https://icy-wood-8abeb12.osama09sms.workers.dev/";
+const KEY = "b12ai_chats_v1";
+
+let chats = []; let cur = null; let files = []; let busy = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function load(){ try{ chats = JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(e){ chats=[]; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(chats.slice(0,60))); }catch(e){} }
+
+function md(t){
+  let h = esc(t);
+  h = h.replace(/```([\s\S]*?)```/g, (m,c)=>"<pre>"+c.trim()+"</pre>");
+  h = h.replace(/`([^`]+)`/g, "<code>$1</code>");
+  h = h.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  h = h.replace(/^### (.+)$/gm, "<b>$1</b>").replace(/^## (.+)$/gm, "<b>$1</b>").replace(/^# (.+)$/gm, "<b>$1</b>");
+  h = h.replace(/^[\-\*] (.+)$/gm, "• $1");
+  return h;
+}
+
+function renderList(){
+  $("list").innerHTML = chats.map(c => `<div class="item ${cur&&cur.id===c.id?'on':''}" onclick="openChat('${c.id}')">${esc(c.title)}</div>`).join("") || `<div class="item" style="color:#9b9b9b">لا توجد محادثات بعد</div>`;
+}
+
+function renderMain(){
+  const w = $("wrap");
+  if(!cur || !cur.msgs.length){
+    const name = (auth.currentUser && (auth.currentUser.displayName || (auth.currentUser.email||"").split("@")[0])) || "";
+    w.innerHTML = `<div class="hello"><h1>أهلاً${name?" <span>"+esc(name)+"</span>":""}، كيف أساعدك اليوم؟</h1>
+      <div class="chips">${["لخّص لي هذا الموضوع","اشرح لي بالتفصيل","أعطني أسئلة مراجعة","ترجم هذا للإنجليزية"].map(x=>`<button class="chip" onclick="chip(this)">${x}</button>`).join("")}</div></div>`;
+    return;
+  }
+  w.innerHTML = cur.msgs.map((m,i)=>{
+    if(m.r==="u") return `<div class="msg u"><div class="bubble">${esc(m.t)}${m.files&&m.files.length?"\n📎 "+m.files.map(esc).join("، "):""}</div></div>`;
+    const body = m.t ? md(m.t) : `<span class="dots"></span>`;
+    return `<div class="msg a"><div class="bubble">${body}</div>${m.t?`<div class="bar"><button onclick="copyMsg(${i})">نسخ</button></div>`:""}</div>`;
+  }).join("");
+  const feed = $("feed"); feed.scrollTop = feed.scrollHeight;
+}
+
+function newChat(){ cur = { id: Date.now().toString(36), title: "محادثة جديدة", msgs: [] }; files=[]; $("files").textContent=""; renderMain(); renderList(); $("inp").focus(); }
+function openChat(id){ cur = chats.find(c=>c.id===id) || null; renderMain(); renderList(); if(window.innerWidth<=760) toggleSide(true); }
+function toggleSide(force){ const s=$("side"); if(force===true) s.classList.add("hide"); else s.classList.toggle("hide"); }
+function searchChats(){ const q = prompt("ابحث في عناوين المحادثات:"); if(!q) return; const hit = chats.filter(c=>c.title.includes(q)); $("list").innerHTML = hit.map(c=>`<div class="item" onclick="openChat('${c.id}')">${esc(c.title)}</div>`).join("") || `<div class="item">لا نتائج</div>`; }
+function chip(el){ $("inp").value = el.textContent + " "; $("inp").focus(); grow($("inp")); }
+function grow(t){ t.style.height="auto"; t.style.height=Math.min(t.scrollHeight,180)+"px"; }
+function onKey(e){ if(e.key==="Enter" && !e.shiftKey){ e.preventDefault(); send(); } }
+function copyMsg(i){ try{ navigator.clipboard.writeText(cur.msgs[i].t); }catch(e){} }
+
+async function pick(fl){
+  files = [];
+  for(const f of Array.from(fl||[]).slice(0,3)){
+    if(f.size > 4500000){ alert("الملف كبير، الحد 4 ميجا"); continue; }
+    const d = await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(",")[1]); r.onerror=rej; r.readAsDataURL(f); });
+    files.push({ n:f.name, m:f.type, d });
+  }
+  $("files").textContent = files.map(f=>"📎 "+f.n).join("   ");
+}
+
+async function send(){
+  if(busy) return;
+  const inp = $("inp"); const q = inp.value.trim();
+  if(!q && !files.length) return;
+  if(!auth.currentUser){ alert("سجّل دخول أول"); return; }
+  if(!cur){ newChat(); }
+  const sent = files.slice();
+  const hist = cur.msgs.slice(-16).map(m=>({r:m.r,t:m.t}));
+  cur.msgs.push({ r:"u", t: q || "(ملف)", files: sent.map(f=>f.n) });
+  const bot = { r:"m", t:"" }; cur.msgs.push(bot);
+  if(cur.msgs.length===2) cur.title = (q||"محادثة").slice(0,40);
+  inp.value=""; grow(inp); files=[]; $("files").textContent="";
+  busy = true; $("sendBtn").disabled = true; renderMain(); renderList();
+
+  let timer = 0; const paint = (force)=>{ const now=Date.now(); if(!force && now-timer<50) return; timer=now; const nodes=$("wrap").querySelectorAll(".msg.a .bubble"); const last=nodes[nodes.length-1]; if(last) last.innerHTML = md(bot.t)||'<span class="dots"></span>'; const feed=$("feed"); feed.scrollTop=feed.scrollHeight; };
+  try{
+    const tk = await auth.currentUser.getIdToken();
+    let r = await fetch(WORKER,{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+tk},body:JSON.stringify({t:"ais",q:q||"لخّص المرفقات",h:hist,files:sent.map(f=>({m:f.m,d:f.d}))})});
+    if(r.status===401){ const tk2 = await auth.currentUser.getIdToken(true); r = await fetch(WORKER,{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+tk2},body:JSON.stringify({t:"ais",q:q||"لخّص المرفقات",h:hist,files:sent.map(f=>({m:f.m,d:f.d}))})}); }
+    if(r.status===401){ bot.t = "انتهت جلسة الدخول. سجّل خروج وادخل تاني."; }
+    else if(!r.ok || !r.body){ const j = await r.json().catch(()=>({})); bot.t = "تعذر الرد: " + (j.error||("HTTP "+r.status)) + (j.reason?"\n"+j.reason:""); }
+    else{
+      const reader = r.body.getReader(); const dec = new TextDecoder(); let buf="";
+      while(true){ const {done,value} = await reader.read(); if(done) break; buf += dec.decode(value,{stream:true}); let i; while((i=buf.indexOf("\n"))>=0){ const line=buf.slice(0,i).trim(); buf=buf.slice(i+1); if(!line) continue; try{ const o=JSON.parse(line); if(o.t){ bot.t+=o.t; paint(false);} if(o.err){ bot.t += (bot.t?"\n":"")+o.err; } }catch(e){} } }
+      if(!bot.t) bot.t = "لم يصل رد. جرّب تاني.";
+    }
+  }catch(e){ bot.t = "تعذر الاتصال: " + (e && e.message ? e.message : e); }
+  busy = false; $("sendBtn").disabled = false;
+  paint(true);
+  const idx = chats.findIndex(c=>c.id===cur.id); if(idx>=0) chats[idx]=cur; else chats.unshift(cur);
+  save(); renderMain(); renderList();
+}
+
+window.newChat=newChat; window.openChat=openChat; window.toggleSide=toggleSide; window.searchChats=searchChats; window.chip=chip; window.grow=grow; window.onKey=onKey; window.copyMsg=copyMsg; window.pick=pick; window.send=send; window.logout=()=>signOut(auth);
+
+function loginView(){
+  $("feed").innerHTML = `<div class="login"><div style="font-size:18px;margin-bottom:8px">سجّل دخول بحساب الطالب</div>
+    <input id="em" type="email" placeholder="البريد الإلكتروني"><input id="pw" type="password" placeholder="كلمة المرور">
+    <button onclick="doLogin()">دخول</button><div class="err" id="err"></div></div>`;
+  window.doLogin = async ()=>{ try{ await signInWithEmailAndPassword(auth, $("em").value.trim(), $("pw").value); location.reload(); }catch(e){ $("err").textContent = "تعذر الدخول: تأكد من البريد وكلمة المرور"; } };
+  $("who").textContent = "غير مسجّل";
+}
+
+load();
+onAuthStateChanged(auth, (u)=>{
+  if(!u){ loginView(); return; }
+  $("who").textContent = (u.displayName || (u.email||"").split("@")[0]);
+  $("feed").innerHTML = '<div class="wrap" id="wrap"></div>';
+  renderList();
+  if(!cur) newChat(); else renderMain();
+});
+</script>
+</body>
+</html>
