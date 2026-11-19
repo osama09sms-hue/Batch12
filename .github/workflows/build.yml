@@ -13,11 +13,9 @@ jobs:
         include:
           - name: student
             id: com.b12.student
-            url: https://osama09sms-hue.github.io/Batch12/student.html
             label: B12
           - name: admin
             id: com.b12.admin
-            url: https://osama09sms-hue.github.io/Batch12/admin.html
             label: B12Admin
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +41,7 @@ jobs:
           window.B12OS = { init: function (id) { OneSignal.initialize(id); return OneSignal.Notifications.requestPermission(false); }, login: function (x) { OneSignal.login(String(x)); } };
           JS
           npx esbuild os-entry.js --bundle --format=iife --outfile=www/os.js
-          printf '%s' '{"appId":"${{ matrix.id }}","appName":"${{ matrix.label }}","webDir":"www","server":{"url":"${{ matrix.url }}","cleartext":false,"androidScheme":"https"}}' > capacitor.config.json
+          printf '%s' '{"appId":"${{ matrix.id }}","appName":"${{ matrix.label }}","webDir":"www","server":{"androidScheme":"https"}}' > capacitor.config.json
       - name: Add Android
         working-directory: app
         run: |
