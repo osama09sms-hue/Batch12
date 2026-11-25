@@ -17,10 +17,16 @@
     tx: 'اكتب رسالتك هنا...',
   };
 
+  function isEn() {
+    try { const c = JSON.parse(localStorage.getItem('b12cfg2')); return !!c && c.lang === 'en'; } catch (e) { return false; }
+  }
+
   function apply() {
+    if (isEn()) return;   // keep the English UI when the user chose English
     for (const id in TEXTS) {
       const el = document.getElementById(id);
       if (!el) continue;
+      if (el.disabled && el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') continue;   // do not erase the '...' loading label
       if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         if (el.placeholder !== TEXTS[id]) el.placeholder = TEXTS[id];
       } else if (el.textContent !== TEXTS[id]) {
