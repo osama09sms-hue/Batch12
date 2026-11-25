@@ -36,7 +36,7 @@ jobs:
           cp ../${{ matrix.name }}-manifest.json www/
           cp ../${{ matrix.name }}-*.png www/
           cp ../sw.js www/
-          cp ../theme.css ../custom.js www/
+          cp ../theme.css ../custom.js ../fixes.js www/
           cat > os-entry.js <<'JS'
           import OneSignal from '@onesignal/capacitor-plugin';
           window.B12OS = { init: function (id) { OneSignal.initialize(id); return OneSignal.Notifications.requestPermission(false); }, login: function (x) { OneSignal.login(String(x)); } };
