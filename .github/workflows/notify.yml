@@ -85,9 +85,21 @@ jobs:
             TOK = await idToken();
             const events = [];
             for (const c of Object.keys(cols)) {
-              const r = await fetch(`${DB}/${c}?pageSize=300`, { headers: { authorization: 'Bearer ' + TOK } });
-              if (!r.ok) { log(c, 'read failed', r.status); continue; }
-              const docs = (await r.json()).documents || [];
+              // newest 300 docs by id (ids are timestamps), so new items are never missed once a collection passes 300 docs
+              let docs = null;
+              try {
+                const q = await fetch(`${DB}:runQuery`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
+                  body: JSON.stringify({ structuredQuery: { from: [{ collectionId: c }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'DESCENDING' }], limit: 300 } })
+                });
+                if (q.ok) docs = (await q.json()).filter(x => x.document).map(x => x.document);
+              } catch (e) { docs = null; }
+              if (!docs) {
+                const r = await fetch(`${DB}/${c}?pageSize=300`, { headers: { authorization: 'Bearer ' + TOK } });
+                if (!r.ok) { log(c, 'read failed', r.status); continue; }
+                docs = (await r.json()).documents || [];
+              }
               const items = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => Number.isSafeInteger(x.id) && x.id > 0);
               if (c === 'events') items.forEach(x => events.push(x));
               const max = items.reduce((m, x) => Math.max(m, x.id), 0);
@@ -122,13 +134,14 @@ jobs:
               const max = items.reduce((m, x) => Math.max(m, x.t), 0);
               if (st.dms === undefined) { st.dms = max; log('dms baseline', max); }
               else {
-                const fresh = items.filter(x => x.t > st.dms).sort((a, b) => a.t - b.t).slice(0, 10);
+                const fresh = items.filter(x => x.t > st.dms).sort((a, b) => a.t - b.t);
+                const batch = fresh.slice(0, 10);
                 log('dms new', fresh.length);
-                for (const x of fresh) {
+                for (const x of batch) {
                   const to = f(x.d, 'to'), who = f(x.d, 'sender') || 'زميل', body = f(x.d, 'body') || (f(x.d, 'img') ? '📷 صورة' : f(x.d, 'aud') ? '🎤 رسالة صوتية' : f(x.d, 'st') || 'رسالة');
                   if (to) await sendTo(to, '💬 ' + who, body.slice(0, 100));
                 }
-                if (items.length) st.dms = max;
+                if (batch.length) st.dms = batch[batch.length - 1].t;
               }
             }
             // class chat digest (at most once per 30 minutes)
@@ -157,12 +170,11 @@ jobs:
               const diff = at - Date.now(), title = f(x.d, 'title');
               const k1 = x.id + ':d1', k2 = x.id + ':h1';
               if (diff > 0 && diff <= 26 * 3600e3 && !st.rem[k1]) {
-                st.rem[k1] = 1;
-                if (Date.now() - x.id > 2 * 3600e3) await send('⏰ تذكير: ' + title, 'بعد أقل من يوم، ' + date + ' ' + (f(x.d, 'time') || ''));
+                if (Date.now() - x.id > 2 * 3600e3) { if (await send('⏰ تذكير: ' + title, 'بعد أقل من يوم، ' + date + ' ' + (f(x.d, 'time') || ''))) st.rem[k1] = 1; }
+                else st.rem[k1] = 1;
               }
               if (diff > 0 && diff <= 90 * 60e3 && !st.rem[k2]) {
-                st.rem[k2] = 1;
-                await send('⏰ بعد ساعة تقريباً: ' + title, 'استعد الآن');
+                if (await send('⏰ بعد ساعة تقريباً: ' + title, 'استعد الآن')) st.rem[k2] = 1;
               }
             }
             fs.writeFileSync(process.env.STATE, JSON.stringify(st));
