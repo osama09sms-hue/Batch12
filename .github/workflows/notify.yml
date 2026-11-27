@@ -14,7 +14,7 @@ jobs:
       - name: Restore state
         run: |
           git fetch origin state --depth=1 && git show FETCH_HEAD:state.json > $RUNNER_TEMP/state.json || echo '{}' > $RUNNER_TEMP/state.json
-      - name: Send notifications
+      - name: Exam and task reminders only
         env:
           OS_KEY: ${{ secrets.ONESIGNAL_API_KEY }}
           BOT_EMAIL: ${{ secrets.BOT_EMAIL }}
@@ -28,13 +28,15 @@ jobs:
           const flush = () => { try { fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '### Notify\n' + out.join('\n') + '\n'); } catch (e) {} };
           const P = 'batch-12-fb6bb', K = 'AIzaSyAdq7CDSqQ7depq4z04rIe23fnkZkn8qcY', APP = '107663d0-b84a-4b8d-a713-c143d59bae83';
           const DB = `https://firestore.googleapis.com/v1/projects/${P}/databases/(default)/documents`;
-          async function idToken() { const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${K}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: process.env.BOT_EMAIL, password: process.env.BOT_PASSWORD, returnSecureToken: true }) }); const j = await r.json(); if (!j.idToken) throw new Error('bot login failed: ' + (j.error && j.error.message)); return j.idToken; }
-          let TOK = '';
-          let st = {};
-          try { st = JSON.parse(fs.readFileSync(process.env.STATE, 'utf8')); } catch (e) {}
-          st.rem = st.rem || {};
           const f = (d, k) => { const v = (d.fields || {})[k]; return v ? String(v.stringValue ?? v.integerValue ?? '') : ''; };
           const SEGS = ['Total Subscriptions', 'Subscribed Users', 'Active Subscriptions'];
+          let TOK = '';
+          async function idToken() {
+            const r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${K}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: process.env.BOT_EMAIL, password: process.env.BOT_PASSWORD, returnSecureToken: true }) });
+            const j = await r.json();
+            if (!j.idToken) throw new Error('bot login failed: ' + (j.error && j.error.message));
+            return j.idToken;
+          }
           async function post(body) {
             const r = await fetch('https://api.onesignal.com/notifications', {
               method: 'POST',
@@ -52,116 +54,24 @@ jobs:
             }
             return false;
           }
-          async function sendTo(pid, h, b) {
-            const x = await post({ headings: { en: h, ar: h }, contents: { en: b || 'B12', ar: b || 'B12' }, include_aliases: { external_id: [pid] } });
-            log('dm', pid, x.status, JSON.stringify(x.j));
-            return x.ok;
-          }
-          async function recent(c, n) {
-            const r = await fetch(`${DB}:runQuery`, {
-              method: 'POST',
-              headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
-              body: JSON.stringify({ structuredQuery: { from: [{ collectionId: c }], orderBy: [{ field: { fieldPath: 't' }, direction: 'DESCENDING' }], limit: n } })
-            });
-            if (!r.ok) { log(c, 'query failed', r.status); return []; }
-            return (await r.json()).filter(x => x.document).map(x => x.document);
-          }
-          const cols = {
-            lectures: d => ['📄 محاضرة جديدة: ' + f(d, 'title'), 'افتح التطبيق للمشاهدة'],
-            events: d => ['📅 ' + f(d, 'title'), (f(d, 'date') + ' ' + f(d, 'time')).trim()],
-            archive: d => ['📁 ' + f(d, 'title'), 'ملف جديد في الأرشيف'],
-            questions: d => ['🧠 سؤال جديد', 'تمت إضافة أسئلة جديدة في بنك الأسئلة'],
-            terms: d => ['📖 مصطلح جديد: ' + f(d, 'en'), f(d, 'ar')],
-            cards: d => ['🗂️ بطاقة حفظ جديدة', f(d, 'front')],
-            videos: d => ['🎬 فيديو جديد: ' + f(d, 'title'), 'افتح التطبيق للمشاهدة'],
-            polls: d => ['🗳️ استطلاع جديد', f(d, 'q')],
-            atlas: d => ['🫀 أطلس: ' + f(d, 'en'), f(d, 'ar')],
-            osce: d => ['🏥 مهارة OSCE جديدة: ' + f(d, 'title'), 'افتح التطبيق للتدريب']
-          };
           (async () => {
             const K0 = process.env.OS_KEY || '';
             log('key length', K0.length, 'prefix', K0.slice(0, 10));
             if (!K0) { log('ONESIGNAL_API_KEY secret is missing'); flush(); process.exit(1); }
+            let st = {};
+            try { st = JSON.parse(fs.readFileSync(process.env.STATE, 'utf8')); } catch (e) {}
+            st.rem = st.rem || {};
             TOK = await idToken();
-            const events = [];
-            for (const c of Object.keys(cols)) {
-              // newest 300 docs by id (ids are timestamps), so new items are never missed once a collection passes 300 docs
-              let docs = null;
-              try {
-                const q = await fetch(`${DB}:runQuery`, {
-                  method: 'POST',
-                  headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
-                  body: JSON.stringify({ structuredQuery: { from: [{ collectionId: c }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'DESCENDING' }], limit: 300 } })
-                });
-                if (q.ok) docs = (await q.json()).filter(x => x.document).map(x => x.document);
-              } catch (e) { docs = null; }
-              if (!docs) {
-                const r = await fetch(`${DB}/${c}?pageSize=300`, { headers: { authorization: 'Bearer ' + TOK } });
-                if (!r.ok) { log(c, 'read failed', r.status); continue; }
-                docs = (await r.json()).documents || [];
-              }
-              const items = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => Number.isSafeInteger(x.id) && x.id > 0);
-              if (c === 'events') items.forEach(x => events.push(x));
-              const max = items.reduce((m, x) => Math.max(m, x.id), 0);
-              if (st[c] === undefined) { st[c] = max; log(c, 'baseline', max); continue; }
-              const fresh = items.filter(x => x.id > st[c]).sort((a, b) => a.id - b.id);
-              log(c, 'docs', items.length, 'last', st[c], 'new', fresh.length);
-              if (!fresh.length) continue;
-              let ok = true;
-              if (c === 'questions' || fresh.length > 3) ok = await send(c === 'questions' ? '🧠 سؤال جديد' : 'تحديثات جديدة في B12', fresh.length + ' عنصر جديد');
-              else for (const x of fresh) { const [h, b] = cols[c](x.d); ok = (await send(h, b)) && ok; }
-              if (ok) st[c] = max;
-            }
-            // news (random ids, use field t)
-            {
-              const docs = await recent('news', 20);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
-              const max = items.reduce((m, x) => Math.max(m, x.t), 0);
-              if (st.news === undefined) { st.news = max; log('news baseline', max); }
-              else {
-                const fresh = items.filter(x => x.t > st.news).sort((a, b) => a.t - b.t);
-                log('news recent', items.length, 'last', st.news, 'new', fresh.length);
-                let ok = true;
-                if (fresh.length > 3) ok = await send('تحديثات جديدة في B12', fresh.length + ' خبر جديد');
-                else for (const x of fresh) ok = (await send('📰 ' + f(x.d, 'title'), f(x.d, 'body').slice(0, 100) || 'خبر جديد')) && ok;
-                if (ok && fresh.length) st.news = max;
-              }
-            }
-            // private messages (to a specific student via external id = pid)
-            {
-              const docs = await recent('dms', 30);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
-              const max = items.reduce((m, x) => Math.max(m, x.t), 0);
-              if (st.dms === undefined) { st.dms = max; log('dms baseline', max); }
-              else {
-                const fresh = items.filter(x => x.t > st.dms).sort((a, b) => a.t - b.t);
-                const batch = fresh.slice(0, 10);
-                log('dms new', fresh.length);
-                for (const x of batch) {
-                  const to = f(x.d, 'to'), who = f(x.d, 'sender') || 'زميل', body = f(x.d, 'body') || (f(x.d, 'img') ? '📷 صورة' : f(x.d, 'aud') ? '🎤 رسالة صوتية' : f(x.d, 'st') || 'رسالة');
-                  if (to) await sendTo(to, '💬 ' + who, body.slice(0, 100));
-                }
-                if (batch.length) st.dms = batch[batch.length - 1].t;
-              }
-            }
-            // class chat digest (at most once per 30 minutes)
-            {
-              const docs = await recent('messages', 30);
-              const items = docs.map(d => ({ t: Number(f(d, 't')), d })).filter(x => x.t > 0 && x.t <= Date.now());
-              const max = items.reduce((m, x) => Math.max(m, x.t), 0);
-              if (st.messages === undefined) { st.messages = max; log('messages baseline', max); }
-              else {
-                const fresh = items.filter(x => x.t > st.messages);
-                log('messages new', fresh.length);
-                if (fresh.length && Date.now() - (st.msgAt || 0) > 30 * 60 * 1000) {
-                  const last = fresh.sort((a, b) => a.t - b.t).slice(-1)[0];
-                  const h = fresh.length === 1 ? '💬 ' + (f(last.d, 'sender') || 'الدردشة') : '💬 الدردشة العامة';
-                  const b = fresh.length === 1 ? (f(last.d, 'body') || 'رسالة جديدة').slice(0, 100) : fresh.length + ' رسائل جديدة';
-                  if (await send(h, b)) { st.messages = max; st.msgAt = Date.now(); }
-                }
-              }
-            }
-            // exam / task reminders (times are Africa/Khartoum, UTC+2)
+            let docs = [];
+            const q = await fetch(`${DB}:runQuery`, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
+              body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'events' }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'DESCENDING' }], limit: 300 } })
+            });
+            if (!q.ok) { log('events query failed', q.status); flush(); process.exit(1); }
+            docs = (await q.json()).filter(x => x.document).map(x => x.document);
+            const events = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => Number.isSafeInteger(x.id) && x.id > 0);
+            log('events read', events.length);
             for (const x of events) {
               const type = f(x.d, 'type'), date = f(x.d, 'date');
               if (!['exam', 'task', 'practical'].includes(type) || !date) continue;
