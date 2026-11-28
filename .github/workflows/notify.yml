@@ -56,7 +56,6 @@ jobs:
           }
           (async () => {
             const K0 = process.env.OS_KEY || '';
-            log('key length', K0.length, 'prefix', K0.slice(0, 10));
             if (!K0) { log('ONESIGNAL_API_KEY secret is missing'); flush(); process.exit(1); }
             let st = {};
             try { st = JSON.parse(fs.readFileSync(process.env.STATE, 'utf8')); } catch (e) {}
