@@ -67,7 +67,7 @@ jobs:
               headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
               body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'events' }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'DESCENDING' }], limit: 300 } })
             });
-            if (!q.ok) { log('events query failed', q.status); flush(); process.exit(1); }
+            if (!q.ok) { log('events query failed', q.status, (await q.text()).slice(0, 300)); flush(); process.exit(1); }
             docs = (await q.json()).filter(x => x.document).map(x => x.document);
             const events = docs.map(d => ({ id: Number(d.name.split('/').pop()), d })).filter(x => Number.isSafeInteger(x.id) && x.id > 0);
             log('events read', events.length);
