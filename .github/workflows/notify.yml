@@ -65,7 +65,7 @@ jobs:
             const q = await fetch(`${DB}:runQuery`, {
               method: 'POST',
               headers: { 'content-type': 'application/json', authorization: 'Bearer ' + TOK },
-              body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'events' }], orderBy: [{ field: { fieldPath: '__name__' }, direction: 'DESCENDING' }], limit: 300 } })
+              body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'events' }], limit: 300 } })
             });
             if (!q.ok) { log('events query failed', q.status, (await q.text()).slice(0, 300)); flush(); process.exit(1); }
             docs = (await q.json()).filter(x => x.document).map(x => x.document);
